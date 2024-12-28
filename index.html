@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Useless Button Game</title>
     <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --button-bg: #6200ea;
+            --button-hover-bg: #5b00d2;
+            --notification-bg: #6200ea;
+            --notification-text: white;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #181818;
+            --text-color: #f4f4f9;
+            --button-bg: #bb86fc;
+            --button-hover-bg: #9f6ff8;
+            --notification-bg: #bb86fc;
+            --notification-text: #181818;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -12,7 +30,9 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: #f4f4f9;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -20,7 +40,7 @@
         }
 
         .button {
-            background: #6200ea;
+            background: var(--button-bg);
             color: white;
             border: none;
             border-radius: 50%;
@@ -33,11 +53,15 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, background 0.3s ease;
         }
 
         .button:active {
             transform: scale(0.95);
+        }
+
+        .button:hover {
+            background: var(--button-hover-bg);
         }
 
         .counter {
@@ -57,8 +81,8 @@
             position: fixed;
             top: 20px;
             right: -300px;
-            background: #6200ea;
-            color: white;
+            background: var(--notification-bg);
+            color: var(--notification-text);
             padding: 20px;
             border-radius: 8px;
             width: 250px;
@@ -85,13 +109,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #ffffff;
-            color: #333;
+            background: var(--bg-color);
+            color: var(--text-color);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             display: none;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .big-notification.visible {
@@ -100,20 +125,39 @@
 
         .big-notification button {
             margin-top: 20px;
-            background: #6200ea;
+            background: var(--button-bg);
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
 
         .big-notification button:hover {
-            background: #5b00d2;
+            background: var(--button-hover-bg);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--button-hover-bg);
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" id="theme-toggle">Toggle Dark Mode</button>
     <div class="container">
         <button class="button" id="useless-button">Click</button>
         <div class="counter" id="click-counter">0</div>
@@ -135,6 +179,7 @@
         const loadNotification = document.getElementById('load-notification');
         const loadSaveButton = document.getElementById('load-save');
         const ignoreSaveButton = document.getElementById('ignore-save');
+        const themeToggle = document.getElementById('theme-toggle');
 
         function saveProgress() {
             const saveData = {
@@ -205,11 +250,21 @@
             loadNotification.classList.remove('visible');
         });
 
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
         window.onload = () => {
             const saveData = loadProgress();
             if (saveData) {
                 loadNotification.classList.add('visible');
             }
+
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
 
             setInterval(saveProgress, 10000);
         };
