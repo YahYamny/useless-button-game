@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Useless Button Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f9;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .button {
+            background: #6200ea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            font-size: 18px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.1s ease;
+        }
+
+        .button:active {
+            transform: scale(0.95);
+        }
+
+        .counter {
+            margin-top: 20px;
+            font-size: 24px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .counter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: -300px;
+            background: #6200ea;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(0);
+            transition: transform 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateX(-300px);
+        }
+
+        .notification h4 {
+            margin: 0 0 10px;
+        }
+
+        .notification p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .big-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            color: #333;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+
+        .big-notification.visible {
+            display: block;
+        }
+
+        .big-notification button {
+            margin-top: 20px;
+            background: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .big-notification button:hover {
+            background: #5b00d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="button" id="useless-button">Click</button>
+        <div class="counter" id="click-counter">0</div>
+    </div>
+
+    <div class="big-notification" id="load-notification">
+        <p>Would you like to load the last save?</p>
+        <button id="load-save">Yes</button>
+        <button id="ignore-save">No</button>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        let firstClick = true;
+        let achievements = { firstClick: false };
+
+        const button = document.getElementById('useless-button');
+        const counter = document.getElementById('click-counter');
+        const loadNotification = document.getElementById('load-notification');
+        const loadSaveButton = document.getElementById('load-save');
+        const ignoreSaveButton = document.getElementById('ignore-save');
+
+        function saveProgress() {
+            const saveData = {
+                clickCount,
+                achievements
+            };
+            localStorage.setItem('uselessButtonSave', JSON.stringify(saveData));
+        }
+
+        function loadProgress() {
+            const saveData = localStorage.getItem('uselessButtonSave');
+            return saveData ? JSON.parse(saveData) : null;
+        }
+
+        function showNotification(title, description) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+
+            const header = document.createElement('h4');
+            header.textContent = title;
+
+            const desc = document.createElement('p');
+            desc.textContent = description;
+
+            notification.appendChild(header);
+            notification.appendChild(desc);
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 50);
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 5000);
+        }
+
+        button.addEventListener('click', () => {
+            clickCount++;
+
+            if (firstClick) {
+                showNotification('Achievement Earned', 'Achieve one click. Wow.');
+                achievements.firstClick = true;
+                firstClick = false;
+            }
+
+            counter.textContent = clickCount;
+            counter.classList.add('visible');
+        });
+
+        loadSaveButton.addEventListener('click', () => {
+            const saveData = loadProgress();
+            if (saveData) {
+                clickCount = saveData.clickCount;
+                achievements = saveData.achievements;
+                counter.textContent = clickCount;
+                counter.classList.add('visible');
+            }
+            loadNotification.classList.remove('visible');
+        });
+
+        ignoreSaveButton.addEventListener('click', () => {
+            loadNotification.classList.remove('visible');
+        });
+
+        window.onload = () => {
+            const saveData = loadProgress();
+            if (saveData) {
+                loadNotification.classList.add('visible');
+            }
+
+            setInterval(saveProgress, 10000);
+        };
+    </script>
+</body>
+</html>
